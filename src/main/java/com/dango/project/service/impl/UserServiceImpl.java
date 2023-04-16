@@ -1,5 +1,4 @@
 package com.dango.project.service.impl;
-import java.util.Date;
 
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.digest.DigestUtil;
@@ -8,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.dango.project.mapper.UserMapper;
 import com.dango.project.common.ErrorCode;
 import com.dango.project.exception.BusinessException;
+import com.dango.project.model.vo.UserAKSKVO;
 import com.dango.project.service.UserService;
 import com.dango.flyapicommon.model.entity.User;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +40,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      */
     private static final String SALT = "dango";
 
+    /**
+     * 随机生成AKSK
+     * @param userAccount
+     * @return
+     */
+    public UserAKSKVO randomAKSK(String userAccount) {
+        String accessKey = DigestUtil.md5Hex(SALT + userAccount + RandomUtil.randomNumbers(5));
+        String secretKey = DigestUtil.md5Hex(SALT + userAccount + RandomUtil.randomNumbers(8));
+        UserAKSKVO userAKSKVO = new UserAKSKVO();
+        userAKSKVO.setAccessKey(accessKey);
+        userAKSKVO.setSecretKey(secretKey);
+        return userAKSKVO;
+    }
+
+
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
         // 1. 校验
@@ -67,8 +82,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             // 2. 加密
             String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
             // 3. 分配 accessKey, secretKey
-            String accessKey = DigestUtil.md5Hex(SALT + userAccount + RandomUtil.randomNumbers(5));
-            String secretKey = DigestUtil.md5Hex(SALT + userAccount + RandomUtil.randomNumbers(8));
+            UserAKSKVO userAKSKVO = randomAKSK(userAccount);
+            String accessKey = userAKSKVO.getAccessKey();
+            String secretKey = userAKSKVO.getSecretKey();
             // 4. 插入数据
             User user = new User();
             user.setUserName(userAccount);
@@ -164,6 +180,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         // 移除登录态
         request.getSession().removeAttribute(USER_LOGIN_STATE);
         return true;
+    }
+
+    @Override
+    public UserAKSKVO userChangeAKSK(HttpServletRequest request) {
+        User loginUser = getLoginUser(request);
+        // 1. 生成新的AKSK
+        UserAKSKVO userAKSKVO = randomAKSK(loginUser.getUserAccount());
+        String accessKey = userAKSKVO.getAccessKey();
+        String secretKey = userAKSKVO.getSecretKey();
+        // 2. 更新数据库
+        User user = new User();
+        user.setId(loginUser.getId());
+        user.setAccessKey(accessKey);
+        user.setSecretKey(secretKey);
+        boolean updateResult = this.updateById(user);
+        if (!updateResult) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "更新失败，数据库错误");
+        }
+        return userAKSKVO;
     }
 
 }

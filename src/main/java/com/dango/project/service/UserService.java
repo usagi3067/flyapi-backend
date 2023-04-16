@@ -3,6 +3,7 @@ package com.dango.project.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.dango.flyapicommon.model.entity.User;
+import com.dango.project.model.vo.UserAKSKVO;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -56,4 +57,6 @@ public interface UserService extends IService<User> {
      * @return
      */
     boolean userLogout(HttpServletRequest request);
+
+    UserAKSKVO userChangeAKSK(HttpServletRequest request);
 }

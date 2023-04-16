@@ -122,6 +122,18 @@ public class UserController {
         return ResultUtils.success(userAKSKVO);
     }
 
+
+    /**
+     * 更换当前用户的AccessKey和SecretKey
+     * @param request
+     * @return
+     */
+    @GetMapping("/change/aksk")
+    public BaseResponse<UserAKSKVO> changeLoginUserAKSK(HttpServletRequest request) {
+        UserAKSKVO userAKSKVO= userService.userChangeAKSK(request);
+        return ResultUtils.success(userAKSKVO);
+    }
+
     // endregion
 
     // region 增删改查
