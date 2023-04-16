@@ -7,6 +7,7 @@ import com.dango.project.common.BaseResponse;
 import com.dango.project.common.DeleteRequest;
 import com.dango.project.common.ResultUtils;
 import com.dango.project.model.dto.user.*;
+import com.dango.project.model.vo.UserAKSKVO;
 import com.dango.project.model.vo.UserVO;
 import com.dango.project.service.UserService;
 import com.dango.project.common.ErrorCode;
@@ -105,6 +106,20 @@ public class UserController {
         UserVO userVO = new UserVO();
         BeanUtils.copyProperties(user, userVO);
         return ResultUtils.success(userVO);
+    }
+
+    /**
+     * 获取当前用户的AccessKey和SecretKey
+     * @param request
+     * @return
+     */
+
+    @GetMapping("/get/aksk")
+    public BaseResponse<UserAKSKVO> getLoginUserAKSK(HttpServletRequest request) {
+        User user = userService.getLoginUser(request);
+        UserAKSKVO userAKSKVO = new UserAKSKVO();
+        BeanUtils.copyProperties(user, userAKSKVO);
+        return ResultUtils.success(userAKSKVO);
     }
 
     // endregion

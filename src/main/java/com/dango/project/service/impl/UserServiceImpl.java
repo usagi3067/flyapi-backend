@@ -1,4 +1,5 @@
 package com.dango.project.service.impl;
+import java.util.Date;
 
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.digest.DigestUtil;
@@ -70,6 +71,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             String secretKey = DigestUtil.md5Hex(SALT + userAccount + RandomUtil.randomNumbers(8));
             // 4. 插入数据
             User user = new User();
+            user.setUserName(userAccount);
+            user.setUserAvatar("https://tupian.qqw21.com/article/UploadPic/2020-10/202010272223486473.jpg");
             user.setUserAccount(userAccount);
             user.setUserPassword(encryptPassword);
             user.setAccessKey(accessKey);
