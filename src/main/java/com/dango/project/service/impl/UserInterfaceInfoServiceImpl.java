@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoMapper, UserInterfaceInfo>
     implements UserInterfaceInfoService{
 
+
+
     @Override
     public void validUserInterfaceInfo(UserInterfaceInfo userInterfaceInfo, boolean add) {
         if (userInterfaceInfo == null) {
@@ -45,6 +47,48 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
 //        updateWrapper.gt("leftNum", 0);
         updateWrapper.setSql("leftNum = leftNum - 1, totalNum = totalNum + 1");
         return this.update(updateWrapper);
+    }
+
+    @Override
+    public UserInterfaceInfo checkInvokePermission(long interfaceInfoId, long userId) {
+        // 判断
+        if (interfaceInfoId <= 0 || userId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        // 根据用户id和接口id查询
+        UserInterfaceInfo userInterfaceInfo = this.getById(interfaceInfoId);
+        if (userInterfaceInfo == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户无调用权限");
+        }
+        return userInterfaceInfo;
+    }
+
+    @Override
+    public UserInterfaceInfo addUserInterface(long interfaceInfoId, long userId) {
+        // 判断
+        if (interfaceInfoId <= 0 || userId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+
+        UserInterfaceInfo userInterfaceInfo = new UserInterfaceInfo();
+        userInterfaceInfo.setInterfaceInfoId(interfaceInfoId);
+        userInterfaceInfo.setUserId(userId);
+        userInterfaceInfo.setLeftNum(0);
+        userInterfaceInfo.setTotalNum(0);
+        this.save(userInterfaceInfo);
+        return userInterfaceInfo;
+    }
+
+    @Override
+    public UserInterfaceInfo queryUserInterfaceInfo(long interfaceInfoId, long userId) {
+        // 判断
+        if (interfaceInfoId <= 0 || userId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        UpdateWrapper<UserInterfaceInfo> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("interfaceInfoId", interfaceInfoId);
+        updateWrapper.eq("userId", userId);
+        return this.getOne(updateWrapper);
     }
 
 }

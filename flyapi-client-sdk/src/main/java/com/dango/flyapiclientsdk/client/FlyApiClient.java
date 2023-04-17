@@ -1,11 +1,17 @@
 package com.dango.flyapiclientsdk.client;
 
+import cn.hutool.core.net.url.UrlBuilder;
+import cn.hutool.core.net.url.UrlQuery;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
+import com.dango.flyapicommon.model.entity.InterfaceInfo;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.dango.flyapiclientsdk.model.User;
+import lombok.extern.slf4j.Slf4j;
 
 
 import java.util.HashMap;
@@ -18,9 +24,12 @@ import static com.dango.flyapiclientsdk.utils.SignUtils.genSign;
  *
  * @author dango
  */
+
+@Slf4j
 public class FlyApiClient {
 
     private static final String GATEWAY_HOST = "http://localhost:8090";
+    private static final String MUSIC_HOST = "http://localhost:3000";
 
     private String accessKey;
 
@@ -71,5 +80,53 @@ public class FlyApiClient {
         String result = httpResponse.body();
         System.out.println(result);
         return result;
+    }
+
+    public String getInterfaceInfo(InterfaceInfo interfaceInfo, String userRequestParams) {
+        // 创建一个 Gson 实例
+        Gson gson = new Gson();
+
+        // 使用 TypeToken 指定 HashMap 的键和值的类型
+        TypeToken<HashMap<String, String>> typeToken = new TypeToken<HashMap<String, String>>() {};
+
+        // 将 JSON 字符串转换为 HashMap
+        HashMap<String, String> resultMap = gson.fromJson(userRequestParams, typeToken.getType());
+        UrlQuery urlQuery = new UrlQuery();
+        // 打印转换后的 HashMap
+        for (Map.Entry<String, String> entry : resultMap.entrySet()) {
+            System.out.println("Key: " + entry.getKey() + ", Value: " + entry.getValue());
+            urlQuery.add(entry.getKey(), entry.getValue());
+        }
+
+        HttpResponse httpResponse = HttpRequest.post(interfaceInfo.getUrl() + "?" + urlQuery.toString())
+                .execute();
+
+
+        return resultMap.toString();
+    }
+
+
+    public String getInterfaceInfo(String Url, String userRequestParams) {
+        // 创建一个 Gson 实例
+        Gson gson = new Gson();
+
+        // 使用 TypeToken 指定 HashMap 的键和值的类型
+        TypeToken<HashMap<String, String>> typeToken = new TypeToken<HashMap<String, String>>() {};
+
+        // 将 JSON 字符串转换为 HashMap
+        HashMap<String, String> resultMap = gson.fromJson(userRequestParams, typeToken.getType());
+        UrlQuery urlQuery = new UrlQuery();
+        // 打印转换后的 HashMap
+        for (Map.Entry<String, String> entry : resultMap.entrySet()) {
+            System.out.println("Key: " + entry.getKey() + ", Value: " + entry.getValue());
+            urlQuery.add(entry.getKey(), entry.getValue());
+        }
+
+        HttpResponse httpResponse = HttpRequest.post(Url + "?" + urlQuery.toString())
+                .execute();
+        String body = httpResponse.body();
+
+
+        return body;
     }
 }

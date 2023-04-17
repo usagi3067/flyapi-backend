@@ -1,5 +1,8 @@
 package com.dango.project.controller;
 
+import cn.hutool.core.net.url.UrlQuery;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dango.project.common.*;
@@ -18,6 +21,7 @@ import com.dango.project.exception.BusinessException;
 import com.dango.flyapiclientsdk.client.FlyApiClient;
 import com.dango.flyapicommon.model.entity.InterfaceInfo;
 import com.dango.flyapicommon.model.entity.User;
+import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -25,7 +29,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 接口管理
@@ -291,10 +297,20 @@ public class InterfaceInfoController {
         String accessKey = loginUser.getAccessKey();
         String secretKey = loginUser.getSecretKey();
         FlyApiClient tempClient = new FlyApiClient(accessKey, secretKey);
-        Gson gson = new Gson();
-        com.dango.flyapiclientsdk.model.User user = gson.fromJson(userRequestParams, com.dango.flyapiclientsdk.model.User.class);
-        String usernameByPost = tempClient.getUsernameByPost(user);
-        return ResultUtils.success(usernameByPost);
+
+
+        String info = tempClient.getInterfaceInfo("http://localhost:3000/song/url", interfaceInfoInvokeRequest.getUserRequestParams());
+        log.debug(info);
+        return ResultUtils.success(info);
+
+
+//        String result = tempClient.invokeInterfaceInfo(userRequestParams);
+//        Gson gson = new Gson();
+//        com.dango.flyapiclientsdk.model.User user = gson.fromJson(userRequestParams, com.dango.flyapiclientsdk.model.User.class);
+//        String usernameByPost = tempClient.getUsernameByPost(user);
+//        if (usernameByPost.equals("Error request, response status: 403"))
+//            return ResultUtils.error(ErrorCode.FORBIDDEN_ERROR, "接口调用失败");
+//        return ResultUtils.success(usernameByPost);
     }
 
 }

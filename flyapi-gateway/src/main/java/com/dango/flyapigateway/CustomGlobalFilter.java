@@ -3,6 +3,7 @@ package com.dango.flyapigateway;
 import com.dango.flyapiclientsdk.utils.SignUtils;
 import com.dango.flyapicommon.model.entity.InterfaceInfo;
 import com.dango.flyapicommon.model.entity.User;
+import com.dango.flyapicommon.model.entity.UserInterfaceInfo;
 import com.dango.flyapicommon.service.InnerInterfaceInfoService;
 import com.dango.flyapicommon.service.InnerUserInterfaceInfoService;
 import com.dango.flyapicommon.service.InnerUserService;
@@ -66,10 +67,10 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
         log.info("请求来源地址：" + request.getRemoteAddress());
         ServerHttpResponse response = exchange.getResponse();
         // 2. 访问控制 - 黑白名单
-        if (!IP_WHITE_LIST.contains(sourceAddress)) {
-            response.setStatusCode(HttpStatus.FORBIDDEN);
-            return response.setComplete();
-        }
+//        if (!IP_WHITE_LIST.contains(sourceAddress)) {
+//            response.setStatusCode(HttpStatus.FORBIDDEN);
+//            return response.setComplete();
+//        }
         // 3. 用户鉴权（判断 ak、sk 是否合法）
         HttpHeaders headers = request.getHeaders();
         String accessKey = headers.getFirst("accessKey");
@@ -115,6 +116,14 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
         if (interfaceInfo == null) {
             return handleNoAuth(response);
         }
+        // 查找用户接口关系表
+        // 找不到  直接返回业务错误
+        UserInterfaceInfo userInterfaceInfo = null;
+        userInterfaceInfo = innerUserInterfaceInfoService.checkInvokePermission(invokeUser.getId(), interfaceInfo.getId());
+        if (userInterfaceInfo == null || userInterfaceInfo.getLeftNum() <= 0) {
+            return handleNoAuth(response);
+        }
+
         // todo 是否还有调用次数
         // 5. 请求转发，调用模拟接口 + 响应日志
         //        Mono<Void> filter = chain.filter(exchange);
