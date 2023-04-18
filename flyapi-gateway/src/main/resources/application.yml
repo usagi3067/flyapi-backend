@@ -7,9 +7,14 @@ spring:
         - AddResponseHeader=source, dango
       routes:
         - id: api_route
-          uri: http://localhost:8123
+          uri: http://localhost:3000
           predicates:
-            - Path=/api/**
+            - Path=/api/wyy/**
+          filters:
+            - RewritePath=/api/wyy/(?<segment>.*), /$\{segment}
+#/song1/url?id=111
+#          filters:
+#            - RewritePath=/api/wyy/(?<segment>.*), /$\{segment}
 #        - id: add_request_header_route
 #          uri: http://localhost:8123
 #          predicates:

@@ -2,14 +2,13 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="generator.mapper.InterfaceInfoMapper">
+<mapper namespace="com.dango.project.mapper.InterfaceInfoMapper">
 
-    <resultMap id="BaseResultMap" type="generator.domain.InterfaceInfo">
+    <resultMap id="BaseResultMap" type="com.dango.flyapicommon.model.entity.InterfaceInfo">
             <id property="id" column="id" jdbcType="BIGINT"/>
             <result property="name" column="name" jdbcType="VARCHAR"/>
             <result property="description" column="description" jdbcType="VARCHAR"/>
-            <result property="baseUrl" column="Url" jdbcType="VARCHAR"/>
-            <result property="requestUrl" column="requestUrl" jdbcType="VARCHAR"/>
+            <result property="url" column="Url" jdbcType="VARCHAR"/>
             <result property="requestHeader" column="requestHeader" jdbcType="VARCHAR"/>
             <result property="responseHeader" column="responseHeader" jdbcType="VARCHAR"/>
             <result property="requestParams" column="requestParams" jdbcType="VARCHAR"/>
@@ -23,7 +22,7 @@
 
     <sql id="Base_Column_List">
         id,name,description,
-        baseUrl,requestUrl,requestHeader,
+        url,requestHeader,
         responseHeader,requestParams,method,
         userId,status,updateTime,
         isDelete,createTime

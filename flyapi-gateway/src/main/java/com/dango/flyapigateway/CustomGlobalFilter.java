@@ -50,7 +50,7 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
 
     private static final List<String> IP_WHITE_LIST = Arrays.asList("127.0.0.1");
 
-    private static final String INTERFACE_HOST = "http://localhost:8123";
+    private static final String INTERFACE_HOST = "http://localhost:3000";
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -119,7 +119,8 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
         // 查找用户接口关系表
         // 找不到  直接返回业务错误
         UserInterfaceInfo userInterfaceInfo = null;
-        userInterfaceInfo = innerUserInterfaceInfoService.checkInvokePermission(invokeUser.getId(), interfaceInfo.getId());
+        //todo
+        userInterfaceInfo = innerUserInterfaceInfoService.checkInvokePermission(interfaceInfo.getId(),invokeUser.getId());
         if (userInterfaceInfo == null || userInterfaceInfo.getLeftNum() <= 0) {
             return handleNoAuth(response);
         }

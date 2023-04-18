@@ -1,9 +1,7 @@
 package com.dango.flyapiinterface;
 
-import cn.hutool.core.net.url.UrlBuilder;
 import cn.hutool.core.net.url.UrlQuery;
 import com.dango.flyapiclientsdk.client.FlyApiClient;
-import com.dango.flyapiclientsdk.model.User;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.junit.jupiter.api.Test;
@@ -16,12 +14,10 @@ import java.util.Map;
 @SpringBootTest
 class FlyapiInterfaceApplicationTests {
 
-    @Resource
-    private FlyApiClient flyApiClient;
 
     @Test
     void contextLoads() {
-        String jsonString = "{\"key1\":\"value1\",\"key2\":\"value2\"}";
+        String jsonString = "{\"id\":33894312}";
 
         // 创建一个 Gson 实例
         Gson gson = new Gson();
@@ -31,11 +27,13 @@ class FlyapiInterfaceApplicationTests {
 
         // 将 JSON 字符串转换为 HashMap
         HashMap<String, String> resultMap = gson.fromJson(jsonString, typeToken.getType());
-
+        UrlQuery urlQuery = new UrlQuery();
         // 打印转换后的 HashMap
         for (Map.Entry<String, String> entry : resultMap.entrySet()) {
             System.out.println("Key: " + entry.getKey() + ", Value: " + entry.getValue());
+            urlQuery.add(entry.getKey(), entry.getValue());
         }
+        System.out.println(urlQuery);
     }
 
 }

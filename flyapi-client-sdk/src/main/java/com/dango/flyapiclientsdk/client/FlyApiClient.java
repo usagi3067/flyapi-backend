@@ -87,7 +87,8 @@ public class FlyApiClient {
         Gson gson = new Gson();
 
         // 使用 TypeToken 指定 HashMap 的键和值的类型
-        TypeToken<HashMap<String, String>> typeToken = new TypeToken<HashMap<String, String>>() {};
+        TypeToken<HashMap<String, String>> typeToken = new TypeToken<HashMap<String, String>>() {
+        };
 
         // 将 JSON 字符串转换为 HashMap
         HashMap<String, String> resultMap = gson.fromJson(userRequestParams, typeToken.getType());
@@ -111,7 +112,8 @@ public class FlyApiClient {
         Gson gson = new Gson();
 
         // 使用 TypeToken 指定 HashMap 的键和值的类型
-        TypeToken<HashMap<String, String>> typeToken = new TypeToken<HashMap<String, String>>() {};
+        TypeToken<HashMap<String, String>> typeToken = new TypeToken<HashMap<String, String>>() {
+        };
 
         // 将 JSON 字符串转换为 HashMap
         HashMap<String, String> resultMap = gson.fromJson(userRequestParams, typeToken.getType());
@@ -121,8 +123,12 @@ public class FlyApiClient {
             System.out.println("Key: " + entry.getKey() + ", Value: " + entry.getValue());
             urlQuery.add(entry.getKey(), entry.getValue());
         }
-
-        HttpResponse httpResponse = HttpRequest.post(Url + "?" + urlQuery.toString())
+        String path = Url + "?" + urlQuery.toString();
+        log.info("请求地址：", path);
+//        HttpResponse httpResponse = HttpRequest.post(Url + "?" + urlQuery.toString())
+//                .execute();
+        HttpResponse httpResponse = HttpRequest.post(path)
+                .addHeaders(getHeaderMap("aa"))
                 .execute();
         String body = httpResponse.body();
 
