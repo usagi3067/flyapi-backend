@@ -56,7 +56,7 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         // 1. 请求日志
         ServerHttpRequest request = exchange.getRequest();
-        String path = INTERFACE_HOST + request.getPath().value();
+        String path = request.getPath().value();
         String method = request.getMethod().toString();
         log.info("请求唯一标识：" + request.getId());
         log.info("请求路径：" + path);

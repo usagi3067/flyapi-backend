@@ -5,26 +5,30 @@
 <mapper namespace="com.dango.project.mapper.InterfaceInfoMapper">
 
     <resultMap id="BaseResultMap" type="com.dango.flyapicommon.model.entity.InterfaceInfo">
-            <id property="id" column="id" jdbcType="BIGINT"/>
-            <result property="name" column="name" jdbcType="VARCHAR"/>
-            <result property="description" column="description" jdbcType="VARCHAR"/>
-            <result property="url" column="Url" jdbcType="VARCHAR"/>
-            <result property="requestHeader" column="requestHeader" jdbcType="VARCHAR"/>
-            <result property="responseHeader" column="responseHeader" jdbcType="VARCHAR"/>
-            <result property="requestParams" column="requestParams" jdbcType="VARCHAR"/>
-            <result property="method" column="method" jdbcType="VARCHAR"/>
-            <result property="userId" column="userId" jdbcType="BIGINT"/>
-            <result property="status" column="status" jdbcType="INTEGER"/>
-            <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
-            <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
-            <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="description" column="description" jdbcType="VARCHAR"/>
+        <result property="bashUrl" column="bashUrl" jdbcType="VARCHAR"/>
+        <result property="port" column="port" jdbcType="INTEGER"/>
+        <result property="path" column="path" jdbcType="VARCHAR"/>
+        <result property="requestBody" column="requestBody" jdbcType="VARCHAR"/>
+        <result property="requestHeader" column="requestHeader" jdbcType="VARCHAR"/>
+        <result property="responseHeader" column="responseHeader" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="INTEGER"/>
+        <result property="method" column="method" jdbcType="VARCHAR"/>
+        <result property="userId" column="userId" jdbcType="BIGINT"/>
+        <result property="demo" column="demo" jdbcType="VARCHAR"/>
+        <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
+        <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id,name,description,
-        url,requestHeader,
-        responseHeader,requestParams,method,
-        userId,status,updateTime,
-        isDelete,createTime
+        bashUrl,port,path,
+        requestBody,requestHeader,responseHeader,
+        status,method,userId,
+        demo,createTime,updateTime,
+        isDelete
     </sql>
 </mapper>

@@ -179,6 +179,7 @@ public class InterfaceInfoController {
      * @param request
      * @return
      */
+    // todo 需整合
     @GetMapping("/list/page")
     public BaseResponse<Page<InterfaceInfo>> listInterfaceInfoByPage(InterfaceInfoQueryRequest interfaceInfoQueryRequest, HttpServletRequest request) {
         if (interfaceInfoQueryRequest == null) {
@@ -191,19 +192,47 @@ public class InterfaceInfoController {
         String sortField = interfaceInfoQueryRequest.getSortField();
         String sortOrder = interfaceInfoQueryRequest.getSortOrder();
         String description = interfaceInfoQuery.getDescription();
+        String name = interfaceInfoQuery.getName();
         // description 需支持模糊搜索
         interfaceInfoQuery.setDescription(null);
+        interfaceInfoQuery.setName(null);
         // 限制爬虫
         if (size > 50) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         QueryWrapper<InterfaceInfo> queryWrapper = new QueryWrapper<>(interfaceInfoQuery);
         queryWrapper.like(StringUtils.isNotBlank(description), "description", description);
+        queryWrapper.like(StringUtils.isNotBlank(name), "name", name);
         queryWrapper.orderBy(StringUtils.isNotBlank(sortField),
                 sortOrder.equals(CommonConstant.SORT_ORDER_ASC), sortField);
         Page<InterfaceInfo> interfaceInfoPage = interfaceInfoService.page(new Page<>(current, size), queryWrapper);
         return ResultUtils.success(interfaceInfoPage);
     }
+//    @GetMapping("/list/page")
+//    public BaseResponse<Page<InterfaceInfo>> listInterfaceInfoByPage(InterfaceInfoQueryRequest interfaceInfoQueryRequest, HttpServletRequest request) {
+//        if (interfaceInfoQueryRequest == null) {
+//            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+//        }
+//        InterfaceInfo interfaceInfoQuery = new InterfaceInfo();
+//        BeanUtils.copyProperties(interfaceInfoQueryRequest, interfaceInfoQuery);
+//        long current = interfaceInfoQueryRequest.getCurrent();
+//        long size = interfaceInfoQueryRequest.getPageSize();
+//        String sortField = interfaceInfoQueryRequest.getSortField();
+//        String sortOrder = interfaceInfoQueryRequest.getSortOrder();
+//        String description = interfaceInfoQuery.getDescription();
+//        // description 需支持模糊搜索
+//        interfaceInfoQuery.setDescription(null);
+//        // 限制爬虫
+//        if (size > 50) {
+//            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+//        }
+//        QueryWrapper<InterfaceInfo> queryWrapper = new QueryWrapper<>(interfaceInfoQuery);
+//        queryWrapper.like(StringUtils.isNotBlank(description), "description", description);
+//        queryWrapper.orderBy(StringUtils.isNotBlank(sortField),
+//                sortOrder.equals(CommonConstant.SORT_ORDER_ASC), sortField);
+//        Page<InterfaceInfo> interfaceInfoPage = interfaceInfoService.page(new Page<>(current, size), queryWrapper);
+//        return ResultUtils.success(interfaceInfoPage);
+//    }
 
     // endregion
 

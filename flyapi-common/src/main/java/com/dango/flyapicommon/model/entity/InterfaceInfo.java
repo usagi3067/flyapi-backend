@@ -30,17 +30,24 @@ public class InterfaceInfo implements Serializable {
     private String description;
 
     /**
-     * 接口地址
+     * 接口ip地址
      */
-    private String url;
+    private String bashUrl;
 
     /**
-     * 请求参数
-     * [
-     *   {"name": "username", "type": "string"}
-     * ]
+     * 接口端口号
      */
-    private String requestParams;
+    private Integer port;
+
+    /**
+     * 接口路径
+     */
+    private String path;
+
+    /**
+     * 请求体
+     */
+    private String requestBody;
 
     /**
      * 请求头
@@ -66,6 +73,11 @@ public class InterfaceInfo implements Serializable {
      * 创建人
      */
     private Long userId;
+
+    /**
+     * 使用示例
+     */
+    private String demo;
 
     /**
      * 创建时间
