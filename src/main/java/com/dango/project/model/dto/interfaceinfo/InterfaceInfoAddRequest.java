@@ -23,14 +23,31 @@ public class InterfaceInfoAddRequest implements Serializable {
     private String description;
 
     /**
-     * 接口地址
+     * 请求类型
      */
-    private String url;
+    private String method;
+
+    /**
+     * 接口ip地址
+     */
+    private String baseUrl;
+
+
+    /**
+     * 接口端口号
+     */
+    private Integer port;
+
+    /**
+     * 接口路径
+     */
+    private String path;
+
 
     /**
      * 请求参数
      */
-    private String requestParams;
+    private String requestBody;
 
     /**
      * 请求头
@@ -43,8 +60,9 @@ public class InterfaceInfoAddRequest implements Serializable {
     private String responseHeader;
 
     /**
-     * 请求类型
+     * 使用示例
      */
-    private String method;
+    private String demo;
+
 
 }

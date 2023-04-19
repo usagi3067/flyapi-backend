@@ -31,9 +31,24 @@ public class InterfaceInfoQueryRequest extends PageRequest implements Serializab
     private String description;
 
     /**
+     * 请求类型
+     */
+    private String method;
+
+    /**
      * 接口地址
      */
-    private String url;
+    private String baseUrl;
+
+    /**
+     * 接口端口号
+     */
+    private Integer port;
+
+    /**
+     * 接口路径
+     */
+    private String path;
 
     /**
      * 请求头
@@ -51,9 +66,9 @@ public class InterfaceInfoQueryRequest extends PageRequest implements Serializab
     private Integer status;
 
     /**
-     * 请求类型
+     * 使用示例
      */
-    private String method;
+    private String demo;
 
     /**
      * 创建人

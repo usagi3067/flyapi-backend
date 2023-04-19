@@ -28,9 +28,25 @@ public class InterfaceInfoUpdateRequest implements Serializable {
     private String description;
 
     /**
+     * 请求类型
+     */
+    private String method;
+
+
+    /**
      * 接口地址
      */
-    private String url;
+    private String baseUrl;
+
+    /**
+     * 接口端口号
+     */
+    private Integer port;
+
+    /**
+     * 接口路径
+     */
+    private String path;
 
     /**
      * 请求参数
@@ -48,14 +64,12 @@ public class InterfaceInfoUpdateRequest implements Serializable {
     private String responseHeader;
 
     /**
-     * 接口状态（0-关闭，1-开启）
+     * 使用示例
      */
-    private Integer status;
+    private String demo;
 
-    /**
-     * 请求类型
-     */
-    private String method;
+
+
 
     private static final long serialVersionUID = 1L;
 }
