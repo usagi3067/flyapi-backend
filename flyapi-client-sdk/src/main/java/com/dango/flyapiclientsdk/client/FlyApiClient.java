@@ -1,13 +1,11 @@
 package com.dango.flyapiclientsdk.client;
 
-import cn.hutool.core.net.url.UrlBuilder;
 import cn.hutool.core.net.url.UrlQuery;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
-import com.dango.flyapicommon.model.entity.InterfaceInfo;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.dango.flyapiclientsdk.model.User;
@@ -28,8 +26,11 @@ import static com.dango.flyapiclientsdk.utils.SignUtils.genSign;
 @Slf4j
 public class FlyApiClient {
 
+    //todo
+    // 这个是开发环境 线上环境要改
+
     private static final String GATEWAY_HOST = "http://localhost:8090";
-    private static final String MUSIC_HOST = "http://localhost:3000";
+    private static final String MUSIC_HOST = "http://localhost:";
 
     private String accessKey;
 
@@ -81,7 +82,7 @@ public class FlyApiClient {
         System.out.println(result);
         return result;
     }
-
+/*
     public String getInterfaceInfo(InterfaceInfo interfaceInfo, String userRequestParams) {
         // 创建一个 Gson 实例
         Gson gson = new Gson();
@@ -104,7 +105,7 @@ public class FlyApiClient {
 
 
         return resultMap.toString();
-    }
+    }*/
 
 
     public String getInterfaceInfo(String Url, String userRequestParams) {
@@ -123,8 +124,10 @@ public class FlyApiClient {
             System.out.println("Key: " + entry.getKey() + ", Value: " + entry.getValue());
             urlQuery.add(entry.getKey(), entry.getValue());
         }
-        String path = Url + "?" + urlQuery.toString();
-        log.info("请求地址：", path);
+
+        log.info("请求参数：{}", urlQuery);
+        String path = GATEWAY_HOST + Url + "?" + urlQuery;
+        log.info("请求地址：{}", path);
 //        HttpResponse httpResponse = HttpRequest.post(Url + "?" + urlQuery.toString())
 //                .execute();
         HttpResponse httpResponse = HttpRequest.post(path)

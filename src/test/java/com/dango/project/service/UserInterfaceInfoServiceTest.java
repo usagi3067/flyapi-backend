@@ -12,6 +12,8 @@ public class UserInterfaceInfoServiceTest {
     @Resource
     private UserInterfaceInfoService userInterfaceInfoService;
 
+
+
     @Test
     public void invokeCount() {
         boolean b = userInterfaceInfoService.invokeCount(1L, 1L);

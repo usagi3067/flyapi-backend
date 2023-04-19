@@ -299,6 +299,9 @@ public class InterfaceInfoController {
         return ResultUtils.success(result);
     }
 
+
+    private static final String GATEWAY_HOST = "http://localhost:8090";
+
     /**
      * 测试调用
      *
@@ -327,14 +330,11 @@ public class InterfaceInfoController {
         String secretKey = loginUser.getSecretKey();
         FlyApiClient tempClient = new FlyApiClient(accessKey, secretKey);
 
+        String path = oldInterfaceInfo.getPath();
 
-        String info = tempClient.getInterfaceInfo("http://localhost:8090/api/wyy/song/url", userRequestParams);
+
+        String info = tempClient.getInterfaceInfo(path, userRequestParams);
         log.debug(info);
-        //这里是不是要把这个http://localhost:3000/song/url改成http://localhost:8090+/song/url，是不是就是按照你说的，改数据库？然后我想问问，就是网易云的url是？
-        // /song/**吗，那我们就是每一个功能，都路由到不同的url
-        // 对，这个我知道怎么改，但是这样子的话，是不是就是网易云可以弄好多好多个接口，就是比如/song/**,/music/**,/user/**,,对啊，那怎么改，这个我就不会了
-        // 或许，我们可以在传到网关的时候http://localhost:8090/api/wyy/song/url，然后让网关路由的时候，剪掉/wyy，可以吗？可是我不知道能不能实现，要不试试？
-        // 在过滤器改? 是先路由还是先过滤器？  dong
         return ResultUtils.success(info);
 
 
