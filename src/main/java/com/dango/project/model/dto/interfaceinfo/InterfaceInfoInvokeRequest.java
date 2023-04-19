@@ -20,7 +20,7 @@ public class InterfaceInfoInvokeRequest implements Serializable {
     /**
      * 用户请求参数
      */
-    private String userRequestParams;
+    private String requestBody;
 
     private static final long serialVersionUID = 1L;
 }

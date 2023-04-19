@@ -334,8 +334,7 @@ public class InterfaceInfoController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         long id = interfaceInfoInvokeRequest.getId();
-        // todo UserRequestParams要改成UserRequestBody
-        String userRequestParams = interfaceInfoInvokeRequest.getUserRequestParams();
+        String requestBody = interfaceInfoInvokeRequest.getRequestBody();
         // 判断是否存在
         InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
         if (oldInterfaceInfo == null) {
@@ -352,7 +351,7 @@ public class InterfaceInfoController {
         String path = oldInterfaceInfo.getPath();
 
 
-        String info = tempClient.getInterfaceInfo(path, userRequestParams);
+        String info = tempClient.getInterfaceInfo(path, requestBody);
         log.debug(info);
         return ResultUtils.success(info);
 
