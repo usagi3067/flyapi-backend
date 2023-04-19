@@ -8,7 +8,7 @@
         <id property="id" column="id" jdbcType="BIGINT"/>
         <result property="name" column="name" jdbcType="VARCHAR"/>
         <result property="description" column="description" jdbcType="VARCHAR"/>
-        <result property="bashUrl" column="bashUrl" jdbcType="VARCHAR"/>
+        <result property="baseUrl" column="baseUrl" jdbcType="VARCHAR"/>
         <result property="port" column="port" jdbcType="INTEGER"/>
         <result property="path" column="path" jdbcType="VARCHAR"/>
         <result property="requestBody" column="requestBody" jdbcType="VARCHAR"/>
@@ -25,7 +25,7 @@
 
     <sql id="Base_Column_List">
         id,name,description,
-        bashUrl,port,path,
+        baseUrl,port,path,
         requestBody,requestHeader,responseHeader,
         status,method,userId,
         demo,createTime,updateTime,

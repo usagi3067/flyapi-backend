@@ -6,12 +6,18 @@ spring:
       default-filters:
         - AddResponseHeader=source, dango
       routes:
-        - id: api_route
+        - id: api_route_1
           uri: http://localhost:3000
           predicates:
             - Path=/api/wyy/**
           filters:
             - RewritePath=/api/wyy/(?<segment>.*), /$\{segment}
+        - id: api_route_2
+          uri: https://api.uomg.com
+          predicates:
+            - Path=/api/twqh/**
+          filters:
+            - RewritePath=/api/twqh/(?<segment>.*), /$\{segment}
 #/song1/url?id=111
 #          filters:
 #            - RewritePath=/api/wyy/(?<segment>.*), /$\{segment}

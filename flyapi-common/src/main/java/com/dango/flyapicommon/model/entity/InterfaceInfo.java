@@ -32,7 +32,7 @@ public class InterfaceInfo implements Serializable {
     /**
      * 接口ip地址
      */
-    private String bashUrl;
+    private String baseUrl;
 
     /**
      * 接口端口号

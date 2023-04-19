@@ -181,7 +181,7 @@ public class InterfaceInfoController {
         BeanUtils.copyProperties(interfaceInfo, interfaceInfoInvokeVO);
 
         // 将GATEWAY_HOST和interfaceInfo对象的path拼接为url，传入interfaceInfoInvokeVO
-        // 网关的bashurl+接口的path
+        // 网关的baseUrl+接口的path
         interfaceInfoInvokeVO.setUrl(GATEWAY_HOST + interfaceInfo.getPath());
         // 通过request获取当前用户信息
         User user = userService.getLoginUser(request);
@@ -275,10 +275,11 @@ public class InterfaceInfoController {
         if (oldInterfaceInfo == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
-        // 判断该接口是否可以调用
+        String path = oldInterfaceInfo.getPath();
+        String requestBody = oldInterfaceInfo.getRequestBody();
         com.dango.flyapiclientsdk.model.User user = new com.dango.flyapiclientsdk.model.User();
         user.setUsername("test");
-        String username = flyApiClient.getUsernameByPost(user);
+        String username = flyApiClient.getInterfaceInfo(path,requestBody);
         if (StringUtils.isBlank(username)) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "接口验证失败");
         }
@@ -333,6 +334,7 @@ public class InterfaceInfoController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         long id = interfaceInfoInvokeRequest.getId();
+        // todo UserRequestParams要改成UserRequestBody
         String userRequestParams = interfaceInfoInvokeRequest.getUserRequestParams();
         // 判断是否存在
         InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);

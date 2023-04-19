@@ -31,7 +31,7 @@ public class InterfaceInfoInvokeVO implements Serializable {
     private String description;
 
     /**
-     * 接口地址(由bashUrl、port、path拼接)
+     * 接口地址(由baseUrl、port、path拼接)
      */
     private String url;
 
