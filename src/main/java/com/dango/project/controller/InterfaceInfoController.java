@@ -5,13 +5,16 @@ import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.dango.flyapicommon.model.entity.UserInterfaceInfo;
 import com.dango.project.common.*;
 import com.dango.project.model.dto.interfaceinfo.InterfaceInfoAddRequest;
 import com.dango.project.model.dto.interfaceinfo.InterfaceInfoInvokeRequest;
 import com.dango.project.model.dto.interfaceinfo.InterfaceInfoQueryRequest;
 import com.dango.project.model.dto.interfaceinfo.InterfaceInfoUpdateRequest;
 import com.dango.project.model.enums.InterfaceInfoStatusEnum;
+import com.dango.project.model.vo.InterfaceInfoInvokeVO;
 import com.dango.project.service.InterfaceInfoService;
+import com.dango.project.service.UserInterfaceInfoService;
 import com.dango.project.service.UserService;
 import com.google.gson.Gson;
 import com.dango.project.annotation.AuthCheck;
@@ -154,6 +157,49 @@ public class InterfaceInfoController {
         return ResultUtils.success(interfaceInfo);
     }
 
+    @Resource
+    private UserInterfaceInfoService userInterfaceInfoService;
+
+    private static final String GATEWAY_HOST = "http://localhost:8090";
+
+    /**
+     * 根据 id 获取
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/getVO")
+    public BaseResponse<InterfaceInfoInvokeVO> getInterfaceInfoVOById(Long id, HttpServletRequest request) {
+        if (id <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+
+
+        InterfaceInfo interfaceInfo = interfaceInfoService.getById(id);
+        // 将interfaceInfo信息复制到interfaceInfoInvokeVO
+        InterfaceInfoInvokeVO interfaceInfoInvokeVO = new InterfaceInfoInvokeVO();
+        BeanUtils.copyProperties(interfaceInfo, interfaceInfoInvokeVO);
+
+        // 将GATEWAY_HOST和interfaceInfo对象的path拼接为url，传入interfaceInfoInvokeVO
+        // 网关的bashurl+接口的path
+        interfaceInfoInvokeVO.setUrl(GATEWAY_HOST + interfaceInfo.getPath());
+        // 通过request获取当前用户信息
+        User user = userService.getLoginUser(request);
+
+        // 通过用户id 和 接口id 查询用户接口信息
+        UserInterfaceInfo userInterfaceInfo = userInterfaceInfoService.queryUserInterfaceInfo(interfaceInfo.getId(), user.getId());
+        // 判空
+        if (userInterfaceInfo == null) {
+            interfaceInfoInvokeVO.setLeftNum(0);
+            return ResultUtils.success(interfaceInfoInvokeVO);
+        }
+        // 获取用户接口信息中的剩余调用次数
+        interfaceInfoInvokeVO.setLeftNum(userInterfaceInfo.getLeftNum());
+
+        return ResultUtils.success(interfaceInfoInvokeVO);
+    }
+
+
     /**
      * 获取列表（仅管理员可使用）
      *
@@ -208,33 +254,6 @@ public class InterfaceInfoController {
         Page<InterfaceInfo> interfaceInfoPage = interfaceInfoService.page(new Page<>(current, size), queryWrapper);
         return ResultUtils.success(interfaceInfoPage);
     }
-//    @GetMapping("/list/page")
-//    public BaseResponse<Page<InterfaceInfo>> listInterfaceInfoByPage(InterfaceInfoQueryRequest interfaceInfoQueryRequest, HttpServletRequest request) {
-//        if (interfaceInfoQueryRequest == null) {
-//            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-//        }
-//        InterfaceInfo interfaceInfoQuery = new InterfaceInfo();
-//        BeanUtils.copyProperties(interfaceInfoQueryRequest, interfaceInfoQuery);
-//        long current = interfaceInfoQueryRequest.getCurrent();
-//        long size = interfaceInfoQueryRequest.getPageSize();
-//        String sortField = interfaceInfoQueryRequest.getSortField();
-//        String sortOrder = interfaceInfoQueryRequest.getSortOrder();
-//        String description = interfaceInfoQuery.getDescription();
-//        // description 需支持模糊搜索
-//        interfaceInfoQuery.setDescription(null);
-//        // 限制爬虫
-//        if (size > 50) {
-//            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-//        }
-//        QueryWrapper<InterfaceInfo> queryWrapper = new QueryWrapper<>(interfaceInfoQuery);
-//        queryWrapper.like(StringUtils.isNotBlank(description), "description", description);
-//        queryWrapper.orderBy(StringUtils.isNotBlank(sortField),
-//                sortOrder.equals(CommonConstant.SORT_ORDER_ASC), sortField);
-//        Page<InterfaceInfo> interfaceInfoPage = interfaceInfoService.page(new Page<>(current, size), queryWrapper);
-//        return ResultUtils.success(interfaceInfoPage);
-//    }
-
-    // endregion
 
     /**
      * 发布
@@ -300,8 +319,6 @@ public class InterfaceInfoController {
     }
 
 
-    private static final String GATEWAY_HOST = "http://localhost:8090";
-
     /**
      * 测试调用
      *
@@ -311,7 +328,7 @@ public class InterfaceInfoController {
      */
     @PostMapping("/invoke")
     public BaseResponse<Object> invokeInterfaceInfo(@RequestBody InterfaceInfoInvokeRequest interfaceInfoInvokeRequest,
-                                                     HttpServletRequest request) {
+                                                    HttpServletRequest request) {
         if (interfaceInfoInvokeRequest == null || interfaceInfoInvokeRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }

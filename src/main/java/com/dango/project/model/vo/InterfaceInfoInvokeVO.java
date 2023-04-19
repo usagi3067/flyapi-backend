@@ -31,17 +31,17 @@ public class InterfaceInfoInvokeVO implements Serializable {
     private String description;
 
     /**
-     * 接口地址
+     * 接口地址(由bashUrl、port、path拼接)
      */
     private String url;
 
     /**
-     * 请求参数
+     * 请求体
      * [
      *   {"name": "username", "type": "string"}
      * ]
      */
-    private String requestParams;
+    private String requestBody;
 
     /**
      * 请求头
@@ -63,10 +63,6 @@ public class InterfaceInfoInvokeVO implements Serializable {
      */
     private String method;
 
-    /**
-     * 创建人
-     */
-    private Long userId;
 
     /**
      * 创建时间
@@ -78,11 +74,15 @@ public class InterfaceInfoInvokeVO implements Serializable {
      */
     private Date updateTime;
 
-
-
+    
     /**
      * 剩余调用次数
      */
     private Integer leftNum;
+
+    /**
+     * 使用示例
+     */
+    private String demo;
 
 }
