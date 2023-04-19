@@ -25,4 +25,8 @@
         select interfaceInfoId, sum(totalNum) as totalNum from user_interface_info group by interfaceInfoId
         order by totalNum desc limit #{limit};
     </select>
+    <select id="listTopInvokeUser" resultType="com.dango.flyapicommon.model.entity.UserInterfaceInfo">
+        select userId, sum(totalNum) as totalNum from user_interface_info group by userId
+        order by totalNum desc limit #{limit};
+    </select>
 </mapper>
