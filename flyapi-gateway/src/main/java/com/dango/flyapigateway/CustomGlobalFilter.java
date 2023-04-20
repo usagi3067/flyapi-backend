@@ -158,14 +158,16 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
                             Flux<? extends DataBuffer> fluxBody = Flux.from(body);
                             // 往返回值里写数据
                             // 拼接字符串
+                            try {
+                                log.info("调用成功，接口调用次数 + 1 invokeCount");
+                                innerUserInterfaceInfoService.invokeCount(interfaceInfoId, userId);
+                            } catch (Exception e) {
+                                log.error("invokeCount error", e);
+                            }
                             return super.writeWith(
                                     fluxBody.map(dataBuffer -> {
                                         // 7. 调用成功，接口调用次数 + 1 invokeCount
-                                        try {
-                                            innerUserInterfaceInfoService.invokeCount(interfaceInfoId, userId);
-                                        } catch (Exception e) {
-                                            log.error("invokeCount error", e);
-                                        }
+
                                         byte[] content = new byte[dataBuffer.readableByteCount()];
                                         dataBuffer.read(content);
                                         DataBufferUtils.release(dataBuffer);//释放掉内存

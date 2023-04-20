@@ -21,5 +21,4 @@ public class FlyapiGatewayApplication {
     public static void main(String[] args) {
         SpringApplication.run(FlyapiGatewayApplication.class, args);
     }
-
 }
