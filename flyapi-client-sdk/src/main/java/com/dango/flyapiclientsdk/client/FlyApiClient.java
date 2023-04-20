@@ -85,7 +85,7 @@ public class FlyApiClient {
     }*/
 
 
-    public String invoke(String Url, String requestBody) {
+    public String invoke(String Url, String requestBody) throws JsonSyntaxException {
         try {
             JsonParser.parseString(requestBody);
         } catch (JsonSyntaxException e) {
@@ -109,6 +109,7 @@ public class FlyApiClient {
             urlQuery.add(entry.getKey(), entry.getValue());
         }
 
+
         log.info("请求参数：{}", urlQuery);
         String path = GATEWAY_HOST + Url + "?" + urlQuery;
         log.info("请求地址：{}", path);
@@ -116,6 +117,7 @@ public class FlyApiClient {
                 .addHeaders(getHeaderMap("dango"))
                 .execute();
         String body = httpResponse.body();
+
         return body;
     }
 }

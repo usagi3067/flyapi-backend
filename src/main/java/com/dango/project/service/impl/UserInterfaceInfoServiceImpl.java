@@ -81,6 +81,22 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
     }
 
     @Override
+    public UserInterfaceInfo addUserInterface(long interfaceInfoId, long userId, int leftNum) {
+        // 判断
+        if (interfaceInfoId <= 0 || userId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+
+        UserInterfaceInfo userInterfaceInfo = new UserInterfaceInfo();
+        userInterfaceInfo.setInterfaceInfoId(interfaceInfoId);
+        userInterfaceInfo.setUserId(userId);
+        userInterfaceInfo.setLeftNum(leftNum);
+        userInterfaceInfo.setTotalNum(0);
+        this.save(userInterfaceInfo);
+        return userInterfaceInfo;
+    }
+
+    @Override
     public UserInterfaceInfo queryUserInterfaceInfo(long interfaceInfoId, long userId) {
         // 判断
         if (interfaceInfoId <= 0 || userId <= 0) {
@@ -91,6 +107,11 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
         queryWrapper.eq("interfaceInfoId", interfaceInfoId);
         queryWrapper.eq("userId", userId);
         return this.getOne(queryWrapper);
+    }
+
+    @Override
+    public void updateByIdWithoutTransaction(UserInterfaceInfo userInterfaceInfo) {
+        updateById(userInterfaceInfo);
     }
 
 }

@@ -31,6 +31,7 @@ import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -65,6 +66,8 @@ public class InterfaceInfoController {
      * @param request
      * @return
      */
+    @Transactional
+    @AuthCheck(mustRole = "admin")
     @PostMapping("/add")
     public BaseResponse<Long> addInterfaceInfo(@RequestBody InterfaceInfoAddRequest interfaceInfoAddRequest, HttpServletRequest request) {
         if (interfaceInfoAddRequest == null) {
@@ -76,7 +79,7 @@ public class InterfaceInfoController {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "示例不满足Json格式,请修改");
         }
         InterfaceInfo interfaceInfo = new InterfaceInfo();
-        BeanUtils.copyProperties(interfaceInfoAddRequest, interfaceInfo);
+
         // 校验
         interfaceInfoService.validInterfaceInfo(interfaceInfo, true);
         User loginUser = userService.getLoginUser(request);
@@ -86,6 +89,9 @@ public class InterfaceInfoController {
             throw new BusinessException(ErrorCode.OPERATION_ERROR);
         }
         long newInterfaceInfoId = interfaceInfo.getId();
+
+        // 给管理员无线调用次数
+        userInterfaceInfoService.addUserInterface(newInterfaceInfoId, loginUser.getId(), 999999);
         return ResultUtils.success(newInterfaceInfoId);
     }
 
@@ -276,16 +282,17 @@ public class InterfaceInfoController {
      * @param request
      * @return
      */
+    @Transactional
     @PostMapping("/online")
     @AuthCheck(mustRole = "admin")
     public BaseResponse<Boolean> onlineInterfaceInfo(@RequestBody IdRequest idRequest,
                                                      HttpServletRequest request) {
+        // 1. 参数校验
         if (idRequest == null || idRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        long id = idRequest.getId();
-        // 判断是否存在
-        InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
+        long interfaceId = idRequest.getId();
+        InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(interfaceId);
         if (oldInterfaceInfo == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
@@ -297,11 +304,22 @@ public class InterfaceInfoController {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "示例不满足Json格式,请修改");
         }
 
-        User loginUser = userService.getLoginUser(request);
-        String accessKey = loginUser.getAccessKey();
-        String secretKey = loginUser.getSecretKey();
-        FlyApiClient flyApiClient = new FlyApiClient(accessKey, secretKey);
 
+        // 2. 设置管理员和接口关系表， 默认调用次数无限, 此处简单设置为999999
+        User loginAdmin = userService.getLoginUser(request);
+
+        UserInterfaceInfo userInterfaceInfo = userInterfaceInfoService.queryUserInterfaceInfo(interfaceId, loginAdmin.getId());
+        if (userInterfaceInfo == null) {
+            userInterfaceInfoService.addUserInterface(interfaceId, loginAdmin.getId(), 999999);
+        } else if (userInterfaceInfo.getLeftNum() <= 0) {
+           userInterfaceInfo.setLeftNum(999999);
+              userInterfaceInfoService.updateByIdWithoutTransaction(userInterfaceInfo);
+        }
+
+        // 3. 调用网关接口, 上线前测试接口是否可用
+        String accessKey = loginAdmin.getAccessKey();
+        String secretKey = loginAdmin.getSecretKey();
+        FlyApiClient flyApiClient = new FlyApiClient(accessKey, secretKey);
         try {
             String json = flyApiClient.invoke(path, requestBody);
             JsonParser.parseString(json);
@@ -311,9 +329,9 @@ public class InterfaceInfoController {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "请检查接口详情是否有误");
         }
 
-        // 仅本人或管理员可修改
+        // 4. 上线接口
         InterfaceInfo interfaceInfo = new InterfaceInfo();
-        interfaceInfo.setId(id);
+        interfaceInfo.setId(interfaceId);
         interfaceInfo.setStatus(InterfaceInfoStatusEnum.ONLINE.getValue());
         boolean result = interfaceInfoService.updateById(interfaceInfo);
         return ResultUtils.success(result);
@@ -330,16 +348,17 @@ public class InterfaceInfoController {
     @AuthCheck(mustRole = "admin")
     public BaseResponse<Boolean> offlineInterfaceInfo(@RequestBody IdRequest idRequest,
                                                       HttpServletRequest request) {
+        // 1. 参数校验
         if (idRequest == null || idRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         long id = idRequest.getId();
-        // 判断是否存在
+
         InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
         if (oldInterfaceInfo == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
-        // 仅本人或管理员可修改
+        // 2. 下线接口
         InterfaceInfo interfaceInfo = new InterfaceInfo();
         interfaceInfo.setId(id);
         interfaceInfo.setStatus(InterfaceInfoStatusEnum.OFFLINE.getValue());
@@ -349,7 +368,7 @@ public class InterfaceInfoController {
 
 
     /**
-     * 测试调用
+     * 平台在线调用
      *
      * @param interfaceInfoInvokeRequest
      * @param request
@@ -358,44 +377,33 @@ public class InterfaceInfoController {
     @PostMapping("/invoke")
     public BaseResponse<Object> invokeInterfaceInfo(@RequestBody InterfaceInfoInvokeRequest interfaceInfoInvokeRequest,
                                                     HttpServletRequest request) {
+        // 1. 参数校验
         if (interfaceInfoInvokeRequest == null || interfaceInfoInvokeRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         long id = interfaceInfoInvokeRequest.getId();
-        String requestBody = interfaceInfoInvokeRequest.getRequestBody();
-        // 判断是否存在
-        InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
-        if (oldInterfaceInfo == null) {
+
+        InterfaceInfo interfaceInfo = interfaceInfoService.getById(id);
+        if (interfaceInfo == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
-        if (oldInterfaceInfo.getStatus() == InterfaceInfoStatusEnum.OFFLINE.getValue()) {
+        if (interfaceInfo.getStatus() == InterfaceInfoStatusEnum.OFFLINE.getValue()) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "接口已关闭");
         }
+
+        // 2. 获取用户ak sk 调用接口前先鉴权
         User loginUser = userService.getLoginUser(request);
         String accessKey = loginUser.getAccessKey();
         String secretKey = loginUser.getSecretKey();
         FlyApiClient tempClient = new FlyApiClient(accessKey, secretKey);
 
-        String path = oldInterfaceInfo.getPath();
+        // 3. 根据用户选择的接口路径和请求体调用接口
+        String path = interfaceInfo.getPath();
+        String requestBody = interfaceInfoInvokeRequest.getRequestBody();
+        // 4. 使用jdk签名算法调用接口， 返回调用结果
+        String result = tempClient.invoke(path, requestBody);
 
-
-        String info = tempClient.invoke(path, requestBody);
-        try {
-            JsonParser.parseString(info);
-        } catch (JsonSyntaxException e) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "请求的资源不存在");
-        }
-        log.debug(info);
-        return ResultUtils.success(info);
-
-
-//        String result = tempClient.invokeInterfaceInfo(userRequestParams);
-//        Gson gson = new Gson();
-//        com.dango.flyapiclientsdk.model.User user = gson.fromJson(userRequestParams, com.dango.flyapiclientsdk.model.User.class);
-//        String usernameByPost = tempClient.getUsernameByPost(user);
-//        if (usernameByPost.equals("Error request, response status: 403"))
-//            return ResultUtils.error(ErrorCode.FORBIDDEN_ERROR, "接口调用失败");
-//        return ResultUtils.success(usernameByPost);
+        return ResultUtils.success(result);
     }
 
 }
