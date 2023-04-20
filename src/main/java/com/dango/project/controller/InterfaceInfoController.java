@@ -3,6 +3,7 @@ package com.dango.project.controller;
 import cn.hutool.core.net.url.UrlQuery;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
+import cn.hutool.json.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dango.flyapicommon.model.entity.UserInterfaceInfo;
@@ -24,6 +25,8 @@ import com.dango.project.exception.BusinessException;
 import com.dango.flyapiclientsdk.client.FlyApiClient;
 import com.dango.flyapicommon.model.entity.InterfaceInfo;
 import com.dango.flyapicommon.model.entity.User;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -52,8 +55,6 @@ public class InterfaceInfoController {
     @Resource
     private UserService userService;
 
-    @Resource
-    private FlyApiClient flyApiClient;
 
     // region 增删改查
 
@@ -68,6 +69,11 @@ public class InterfaceInfoController {
     public BaseResponse<Long> addInterfaceInfo(@RequestBody InterfaceInfoAddRequest interfaceInfoAddRequest, HttpServletRequest request) {
         if (interfaceInfoAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        try {
+            JsonParser.parseString(interfaceInfoAddRequest.getDemo());
+        } catch (JsonSyntaxException e) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "示例不满足Json格式,请修改");
         }
         InterfaceInfo interfaceInfo = new InterfaceInfo();
         BeanUtils.copyProperties(interfaceInfoAddRequest, interfaceInfo);
@@ -123,6 +129,14 @@ public class InterfaceInfoController {
         if (interfaceInfoUpdateRequest == null || interfaceInfoUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+
+        try {
+            JsonParser.parseString(interfaceInfoUpdateRequest.getDemo());
+        } catch (JsonSyntaxException e) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "示例不满足Json格式,请修改");
+        }
+
+
         InterfaceInfo interfaceInfo = new InterfaceInfo();
         BeanUtils.copyProperties(interfaceInfoUpdateRequest, interfaceInfo);
         // 参数校验
@@ -276,13 +290,27 @@ public class InterfaceInfoController {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
         String path = oldInterfaceInfo.getPath();
-        String requestBody = oldInterfaceInfo.getRequestBody();
-        com.dango.flyapiclientsdk.model.User user = new com.dango.flyapiclientsdk.model.User();
-        user.setUsername("test");
-        String username = flyApiClient.getInterfaceInfo(path,requestBody);
-        if (StringUtils.isBlank(username)) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "接口验证失败");
+        String requestBody = oldInterfaceInfo.getDemo();
+        try {
+            JsonParser.parseString(requestBody);
+        } catch (JsonSyntaxException e) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "示例不满足Json格式,请修改");
         }
+
+        User loginUser = userService.getLoginUser(request);
+        String accessKey = loginUser.getAccessKey();
+        String secretKey = loginUser.getSecretKey();
+        FlyApiClient flyApiClient = new FlyApiClient(accessKey, secretKey);
+
+        try {
+            String json = flyApiClient.invoke(path, requestBody);
+            JsonParser.parseString(json);
+        } catch (JsonSyntaxException e) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "请求的资源不存在");
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "请检查接口详情是否有误");
+        }
+
         // 仅本人或管理员可修改
         InterfaceInfo interfaceInfo = new InterfaceInfo();
         interfaceInfo.setId(id);
@@ -351,7 +379,12 @@ public class InterfaceInfoController {
         String path = oldInterfaceInfo.getPath();
 
 
-        String info = tempClient.getInterfaceInfo(path, requestBody);
+        String info = tempClient.invoke(path, requestBody);
+        try {
+            JsonParser.parseString(info);
+        } catch (JsonSyntaxException e) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "请求的资源不存在");
+        }
         log.debug(info);
         return ResultUtils.success(info);
 
