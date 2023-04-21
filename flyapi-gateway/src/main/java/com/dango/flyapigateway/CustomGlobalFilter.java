@@ -1,6 +1,8 @@
 package com.dango.flyapigateway;
 
 import com.dango.flyapiclientsdk.utils.SignUtils;
+import com.dango.flyapicommon.exception.BusinessException;
+import com.dango.flyapicommon.exception.ErrorCode;
 import com.dango.flyapicommon.model.entity.InterfaceInfo;
 import com.dango.flyapicommon.model.entity.User;
 import com.dango.flyapicommon.model.entity.UserInterfaceInfo;
@@ -162,7 +164,7 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
                                 log.info("调用成功，接口调用次数 + 1 invokeCount");
                                 innerUserInterfaceInfoService.invokeCount(interfaceInfoId, userId);
                             } catch (Exception e) {
-                                log.error("invokeCount error", e);
+                                throw new BusinessException(ErrorCode.FORBIDDEN_ERROR, "调用次数不足");
                             }
                             return super.writeWith(
                                     fluxBody.map(dataBuffer -> {
