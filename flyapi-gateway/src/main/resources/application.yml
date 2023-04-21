@@ -9,7 +9,7 @@ spring:
   cloud:
     nacos:
       config:
-        server-addr: 123.249.16.77:8848
+        server-addr: 127.0.0.1:8848
         group: dev
         namespace: flyapi-gateway
 #    gateway:
@@ -66,5 +66,5 @@ dubbo:
     port: -1
   registry:
     id: nacos-registry
-    address: nacos://123.249.16.77:8848
+    address: nacos://127.0.0.1:8848
 
