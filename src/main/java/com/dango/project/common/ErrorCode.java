@@ -3,7 +3,9 @@ package com.dango.project.common;
 /**
  * 错误码
  *
- * @author dango
+ * 这个枚举类定义了 API 接口可能返回的所有错误码。每个错误码包含两个属性：状态码和消息。状态码是一个整数，表示这个错误的编号；消息是一个字符串，表示这个错误的具体信息。
+ *
+ * 错误码是用于描述接口返回状态的一种规范，通常情况下，状态码应该是和 HTTP 状态码保持一致的。
  */
 public enum ErrorCode {
 
@@ -26,15 +28,31 @@ public enum ErrorCode {
      */
     private final String message;
 
+    /**
+     * 构造函数
+     *
+     * @param code 状态码
+     * @param message 消息
+     */
     ErrorCode(int code, String message) {
         this.code = code;
         this.message = message;
     }
 
+    /**
+     * 获取状态码
+     *
+     * @return 状态码
+     */
     public int getCode() {
         return code;
     }
 
+    /**
+     * 获取消息
+     *
+     * @return 消息
+     */
     public String getMessage() {
         return message;
     }

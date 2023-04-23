@@ -22,6 +22,7 @@ public class InnerUserServiceImpl implements InnerUserService {
         if (StringUtils.isAnyBlank(accessKey)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        // 根据ak查询是否有调用权限，没有则抛出异常
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("accessKey", accessKey);
         return userMapper.selectOne(queryWrapper);

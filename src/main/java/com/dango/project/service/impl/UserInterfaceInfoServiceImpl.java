@@ -18,7 +18,11 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
     implements UserInterfaceInfoService{
 
 
-
+    /**
+     * 校验是否有调用权限、接口是否存在、用户是否存在
+     * @param userInterfaceInfo
+     * @param add
+     */
     @Override
     public void validUserInterfaceInfo(UserInterfaceInfo userInterfaceInfo, boolean add) {
         if (userInterfaceInfo == null) {
@@ -35,6 +39,12 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
         }
     }
 
+    /**
+     * 每次用户成功调用接口时，总次数+1，剩余次数-1
+     * @param interfaceInfoId
+     * @param userId
+     * @return
+     */
     @Override
     public boolean invokeCount(long interfaceInfoId, long userId) {
         // 判断
@@ -50,6 +60,12 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
         return this.update(updateWrapper);
     }
 
+    /**
+     * 校验用户是否有调用权限
+     * @param interfaceInfoId
+     * @param userId
+     * @return
+     */
     @Override
     public UserInterfaceInfo checkInvokePermission(long interfaceInfoId, long userId) {
         // 判断
@@ -64,6 +80,12 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
         return userInterfaceInfo;
     }
 
+    /**
+     * 根据用户id和接口id添加用户接口信息
+     * @param interfaceInfoId
+     * @param userId
+     * @return
+     */
     @Override
     public UserInterfaceInfo addUserInterface(long interfaceInfoId, long userId) {
         // 判断
@@ -80,6 +102,13 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
         return userInterfaceInfo;
     }
 
+    /**
+     * 根据用户id和接口id和剩余调用次数 添加用户接口信息
+     * @param interfaceInfoId
+     * @param userId
+     * @param leftNum
+     * @return
+     */
     @Override
     public UserInterfaceInfo addUserInterface(long interfaceInfoId, long userId, int leftNum) {
         // 判断

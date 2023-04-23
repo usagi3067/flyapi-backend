@@ -9,31 +9,31 @@ spring:
   cloud:
     nacos:
       config:
-        server-addr: 127.0.0.1:8848
+        server-addr: 8.130.31.245:8848
         group: dev
         namespace: flyapi-gateway
-#    gateway:
-#      default-filters:
-#        - AddResponseHeader=source, dango
-#      routes:
-#        - id: api_route_1
-#          uri: http://localhost:3000
-#          predicates:
-#            - Path=/api/wyy/**
-#          filters:
-#            - RewritePath=/api/wyy/(?<segment3>.*), /$\{segment3}
-#        - id: api_route_2
-#          uri: https://api.uomg.com
-#          predicates:
-#            - Path=/api/twqh/**
-#          filters:
-#            - RewritePath=/api/twqh(?<segment>.*), /$\{segment}
-#        - id: api_route_3
-#          uri: https://api.btstu.cn
-#          predicates:
-#            - Path=/api/djt/**
-#          filters:
-#            - RewritePath=/api/djt(?<segment2>.*), /$\{segment2}
+    gateway:
+      default-filters:
+        - AddResponseHeader=source, dango
+      routes:
+        - id: api_route_1
+          uri: http://localhost:3000
+          predicates:
+            - Path=/api/wyy/**
+          filters:
+            - RewritePath=/api/wyy/(?<segment3>.*), /$\{segment3}
+        - id: api_route_2
+          uri: https://api.uomg.com
+          predicates:
+            - Path=/api/twqh/**
+          filters:
+            - RewritePath=/api/twqh(?<segment>.*), /$\{segment}
+        - id: api_route_3
+          uri: https://api.btstu.cn
+          predicates:
+            - Path=/api/djt/**
+          filters:
+            - RewritePath=/api/djt(?<segment2>.*), /$\{segment2}
 #/song1/url?id=111
 #          filters:
 #            - RewritePath=/api/wyy/(?<segment>.*), /$\{segment}
@@ -66,5 +66,5 @@ dubbo:
     port: -1
   registry:
     id: nacos-registry
-    address: nacos://127.0.0.1:8848
+    address: nacos://8.130.31.245:8848
 

@@ -54,7 +54,7 @@ public class UserInterfaceInfoController {
     private InterfaceInfoService interfaceInfoService;
 
     /**
-     * 创建
+     * 创建--》目前没有用到
      *
      * @param userInterfaceInfoAddRequest
      * @param request
@@ -63,9 +63,11 @@ public class UserInterfaceInfoController {
     @PostMapping("/add")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Long> addUserInterfaceInfo(@RequestBody UserInterfaceInfoAddRequest userInterfaceInfoAddRequest, HttpServletRequest request) {
+        // 参数校验
         if (userInterfaceInfoAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        // 将参数中的UserInterfaceInfoAddRequest信息转换为用户接口实体类
         UserInterfaceInfo userInterfaceInfo = new UserInterfaceInfo();
         BeanUtils.copyProperties(userInterfaceInfoAddRequest, userInterfaceInfo);
         // 校验
@@ -81,7 +83,7 @@ public class UserInterfaceInfoController {
     }
 
     /**
-     * 删除
+     * 删除--》目前没有用到
      *
      * @param deleteRequest
      * @param request
@@ -109,7 +111,7 @@ public class UserInterfaceInfoController {
     }
 
     /**
-     * 更新
+     * 更新--》目前没有用到
      *
      * @param userInterfaceInfoUpdateRequest
      * @param request
@@ -192,6 +194,7 @@ public class UserInterfaceInfoController {
         BeanUtils.copyProperties(userInterfaceInfoQueryRequest, userInterfaceInfoQuery);
         long current = userInterfaceInfoQueryRequest.getCurrent();
         long size = userInterfaceInfoQueryRequest.getPageSize();
+        // 获取排序字段和排序顺序
         String sortField = userInterfaceInfoQueryRequest.getSortField();
         String sortOrder = userInterfaceInfoQueryRequest.getSortOrder();
         // 限制爬虫

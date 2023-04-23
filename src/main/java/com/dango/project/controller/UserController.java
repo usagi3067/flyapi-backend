@@ -45,15 +45,18 @@ public class UserController {
      */
     @PostMapping("/register")
     public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
+        // 参数校验
         if (userRegisterRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        // 获取账号注册的名称和密码
         String userAccount = userRegisterRequest.getUserAccount();
         String userPassword = userRegisterRequest.getUserPassword();
         String checkPassword = userRegisterRequest.getCheckPassword();
         if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
             return null;
         }
+        // 调用service层的注册方法，返回注册结果————新用户id
         long result = userService.userRegister(userAccount, userPassword, checkPassword);
         return ResultUtils.success(result);
     }
@@ -70,11 +73,13 @@ public class UserController {
         if (userLoginRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        // 获取账号注册的名称和密码
         String userAccount = userLoginRequest.getUserAccount();
         String userPassword = userLoginRequest.getUserPassword();
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        // 调用service层的登录方法，返回登录结果————用户信息
         User user = userService.userLogin(userAccount, userPassword, request);
         return ResultUtils.success(user);
     }
@@ -87,9 +92,11 @@ public class UserController {
      */
     @PostMapping("/logout")
     public BaseResponse<Boolean> userLogout(HttpServletRequest request) {
+        // 参数校验
         if (request == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        // 调用service层的注销方法，返回注销结果————是否注销成功
         boolean result = userService.userLogout(request);
         return ResultUtils.success(result);
     }
@@ -102,8 +109,10 @@ public class UserController {
      */
     @GetMapping("/get/login")
     public BaseResponse<UserVO> getLoginUser(HttpServletRequest request) {
+        // 调用service层的获取当前登录用户方法，返回当前登录用户信息
         User user = userService.getLoginUser(request);
         UserVO userVO = new UserVO();
+        // 将user的属性复制到userVO中
         BeanUtils.copyProperties(user, userVO);
         return ResultUtils.success(userVO);
     }
@@ -116,8 +125,10 @@ public class UserController {
 
     @GetMapping("/get/aksk")
     public BaseResponse<UserAKSKVO> getLoginUserAKSK(HttpServletRequest request) {
+        // 调用service层的获取当前登录用户方法，返回当前登录用户信息
         User user = userService.getLoginUser(request);
         UserAKSKVO userAKSKVO = new UserAKSKVO();
+        // 将user的属性复制到userAKSKVO中
         BeanUtils.copyProperties(user, userAKSKVO);
         return ResultUtils.success(userAKSKVO);
     }
@@ -147,15 +158,19 @@ public class UserController {
      */
     @PostMapping("/add")
     public BaseResponse<Long> addUser(@RequestBody UserAddRequest userAddRequest, HttpServletRequest request) {
+        // 参数校验
         if (userAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        // 将userAddRequest的属性复制到user中
         User user = new User();
         BeanUtils.copyProperties(userAddRequest, user);
+        // 调用service层的创建用户方法，返回是否创建成功
         boolean result = userService.save(user);
         if (!result) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR);
         }
+        // 返回创建的用户id
         return ResultUtils.success(user.getId());
     }
 
@@ -168,9 +183,11 @@ public class UserController {
      */
     @PostMapping("/delete")
     public BaseResponse<Boolean> deleteUser(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
+        // 参数校验
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        // 调用service层的删除用户方法，返回是否删除成功
         boolean b = userService.removeById(deleteRequest.getId());
         return ResultUtils.success(b);
     }
@@ -184,11 +201,14 @@ public class UserController {
      */
     @PostMapping("/update")
     public BaseResponse<Boolean> updateUser(@RequestBody UserUpdateRequest userUpdateRequest, HttpServletRequest request) {
+        // 参数校验
         if (userUpdateRequest == null || userUpdateRequest.getId() == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        // 将userUpdateRequest的属性复制到user中
         User user = new User();
         BeanUtils.copyProperties(userUpdateRequest, user);
+        //  调用service层的更新用户方法，返回是否更新成功
         boolean result = userService.updateById(user);
         return ResultUtils.success(result);
     }
@@ -202,9 +222,11 @@ public class UserController {
      */
     @GetMapping("/get")
     public BaseResponse<UserVO> getUserById(int id, HttpServletRequest request) {
+        // 参数校验
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        // 调用service层的获取用户方法，返回用户信息
         User user = userService.getById(id);
         UserVO userVO = new UserVO();
         BeanUtils.copyProperties(user, userVO);
@@ -224,13 +246,16 @@ public class UserController {
         if (userQueryRequest != null) {
             BeanUtils.copyProperties(userQueryRequest, userQuery);
         }
+        // 调用service层的获取用户列表方法，返回用户列表
         QueryWrapper<User> queryWrapper = new QueryWrapper<>(userQuery);
         List<User> userList = userService.list(queryWrapper);
+        // 将userList中的user转换为userVO
         List<UserVO> userVOList = userList.stream().map(user -> {
             UserVO userVO = new UserVO();
             BeanUtils.copyProperties(user, userVO);
             return userVO;
         }).collect(Collectors.toList());
+        // 返回用户列表
         return ResultUtils.success(userVOList);
     }
 
@@ -243,22 +268,26 @@ public class UserController {
      */
     @GetMapping("/list/page")
     public BaseResponse<Page<UserVO>> listUserByPage(UserQueryRequest userQueryRequest, HttpServletRequest request) {
-        long current = 1;
-        long size = 10;
+        long current = 1;// 当前页
+        long size = 10;// 每页条数
         User userQuery = new User();
+        // 参数校验
         if (userQueryRequest != null) {
             BeanUtils.copyProperties(userQueryRequest, userQuery);
             current = userQueryRequest.getCurrent();
             size = userQueryRequest.getPageSize();
         }
+        // 调用service层的分页获取用户列表方法，返回用户列表
         QueryWrapper<User> queryWrapper = new QueryWrapper<>(userQuery);
         Page<User> userPage = userService.page(new Page<>(current, size), queryWrapper);
         Page<UserVO> userVOPage = new PageDTO<>(userPage.getCurrent(), userPage.getSize(), userPage.getTotal());
+        // 将userPage中的user转换为userVO
         List<UserVO> userVOList = userPage.getRecords().stream().map(user -> {
             UserVO userVO = new UserVO();
             BeanUtils.copyProperties(user, userVO);
             return userVO;
         }).collect(Collectors.toList());
+        // set用户列表
         userVOPage.setRecords(userVOList);
         return ResultUtils.success(userVOPage);
     }

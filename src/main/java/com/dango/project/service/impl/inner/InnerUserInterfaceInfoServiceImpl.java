@@ -20,6 +20,7 @@ public class InnerUserInterfaceInfoServiceImpl implements InnerUserInterfaceInfo
 
     @Override
     public UserInterfaceInfo checkInvokePermission(long interfaceInfoId, long userId) {
+        // 查看是否有调用权限，没有则抛出异常ErrorCode.PARAMS_ERROR, "用户无调用权限"
         return userInterfaceInfoService.checkInvokePermission(interfaceInfoId, userId);
     }
 }

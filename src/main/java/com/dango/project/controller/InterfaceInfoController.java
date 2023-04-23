@@ -45,11 +45,11 @@ import java.util.Map;
  *
  * @author dango
  */
-@RestController
-@RequestMapping("/interfaceInfo")
-@Slf4j
+@RestController // 标记此类为控制器
+@RequestMapping("/interfaceInfo") // 指定映射请求路径
+@Slf4j // 引入日志工具
 public class InterfaceInfoController {
-
+    // 引入依赖
     @Resource
     private InterfaceInfoService interfaceInfoService;
 
@@ -60,70 +60,79 @@ public class InterfaceInfoController {
     // region 增删改查
 
     /**
-     * 创建
+     * 创建接口
      *
-     * @param interfaceInfoAddRequest
+     * @param interfaceInfoAddRequest 请求参数
      * @param request
-     * @return
+     * @return 返回新建接口的ID
      */
-    @Transactional
-    @AuthCheck(mustRole = "admin")
+    @Transactional // 支持事务
+    @AuthCheck(mustRole = "admin") // 鉴权，只有管理员可以调用此接口
     @PostMapping("/add")
-    public BaseResponse<Long> addInterfaceInfo(@RequestBody InterfaceInfoAddRequest interfaceInfoAddRequest, HttpServletRequest request) {
+    public BaseResponse<Long> addInterfaceInfo(@RequestBody InterfaceInfoAddRequest interfaceInfoAddRequest,
+                                               HttpServletRequest request) {
+        // 参数校验
         if (interfaceInfoAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        // 检查示例是否为合法JSON格式
         try {
             JsonParser.parseString(interfaceInfoAddRequest.getDemo());
         } catch (JsonSyntaxException e) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "示例不满足Json格式,请修改");
         }
+        // 新建接口对象
         InterfaceInfo interfaceInfo = new InterfaceInfo();
-
-        // 校验
+        // 复制属性
+        BeanUtils.copyProperties(interfaceInfoAddRequest, interfaceInfo);
+        // 参数校验
         interfaceInfoService.validInterfaceInfo(interfaceInfo, true);
+        // 设置接口创建者
         User loginUser = userService.getLoginUser(request);
         interfaceInfo.setUserId(loginUser.getId());
+        // 保存接口
         boolean result = interfaceInfoService.save(interfaceInfo);
         if (!result) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR);
         }
+        // 获取新建接口的ID
         long newInterfaceInfoId = interfaceInfo.getId();
-
-        // 给管理员无线调用次数
+        // 给管理员无限调用次数
         userInterfaceInfoService.addUserInterface(newInterfaceInfoId, loginUser.getId(), 999999);
         return ResultUtils.success(newInterfaceInfoId);
     }
 
     /**
-     * 删除
+     * 删除接口
      *
-     * @param deleteRequest
+     * @param deleteRequest 请求参数，包含要删除的接口ID
      * @param request
-     * @return
+     * @return 返回是否删除成功
      */
     @PostMapping("/delete")
     public BaseResponse<Boolean> deleteInterfaceInfo(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
+        // 参数校验
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User user = userService.getLoginUser(request);
         long id = deleteRequest.getId();
-        // 判断是否存在
+        // 判断要删除的接口是否存在
         InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
         if (oldInterfaceInfo == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
-        // 仅本人或管理员可删除
+        // 判断是否有删除权限，只有接口创建者和管理员可以删除
         if (!oldInterfaceInfo.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
+        // 删除接口
         boolean b = interfaceInfoService.removeById(id);
         return ResultUtils.success(b);
     }
 
     /**
-     * 更新
+     * 更新接口信息
      *
      * @param interfaceInfoUpdateRequest
      * @param request
@@ -132,47 +141,55 @@ public class InterfaceInfoController {
     @PostMapping("/update")
     public BaseResponse<Boolean> updateInterfaceInfo(@RequestBody InterfaceInfoUpdateRequest interfaceInfoUpdateRequest,
                                                      HttpServletRequest request) {
+        // 参数校验，若接口信息为空或id<=0，抛出参数异常
         if (interfaceInfoUpdateRequest == null || interfaceInfoUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
 
+        // 校验接口示例是否为json格式，若不是，抛出系统异常
         try {
             JsonParser.parseString(interfaceInfoUpdateRequest.getDemo());
         } catch (JsonSyntaxException e) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "示例不满足Json格式,请修改");
         }
 
-
+        // 创建InterfaceInfo对象，将请求参数复制到该对象中
         InterfaceInfo interfaceInfo = new InterfaceInfo();
         BeanUtils.copyProperties(interfaceInfoUpdateRequest, interfaceInfo);
         // 参数校验
         interfaceInfoService.validInterfaceInfo(interfaceInfo, false);
+        // 获取当前登录的用户
         User user = userService.getLoginUser(request);
         long id = interfaceInfoUpdateRequest.getId();
-        // 判断是否存在
+        // 根据id获取该接口信息
         InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
+        // 判断接口是否存在，若不存在，抛出未找到异常
         if (oldInterfaceInfo == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
-        // 仅本人或管理员可修改
+        // 判断当前用户是否具有修改权限，若无权限，抛出无权限异常
         if (!oldInterfaceInfo.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
+        // 更新接口信息
         boolean result = interfaceInfoService.updateById(interfaceInfo);
         return ResultUtils.success(result);
+
     }
 
     /**
-     * 根据 id 获取
+     * 根据 id 获取接口信息
      *
      * @param id
      * @return
      */
     @GetMapping("/get")
     public BaseResponse<InterfaceInfo> getInterfaceInfoById(long id) {
+        // 参数校验，若id<=0，抛出参数异常
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        // 根据id获取该接口信息
         InterfaceInfo interfaceInfo = interfaceInfoService.getById(id);
         return ResultUtils.success(interfaceInfo);
     }
@@ -183,18 +200,19 @@ public class InterfaceInfoController {
     private static final String GATEWAY_HOST = "http://localhost:8090";
 
     /**
-     * 根据 id 获取
+     * 获取指定id的接口信息的视图对象
      *
      * @param id
      * @return
      */
     @GetMapping("/getVO")
     public BaseResponse<InterfaceInfoInvokeVO> getInterfaceInfoVOById(Long id, HttpServletRequest request) {
+        // 参数校验
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
 
-
+// 根据id获取接口信息
         InterfaceInfo interfaceInfo = interfaceInfoService.getById(id);
         // 将interfaceInfo信息复制到interfaceInfoInvokeVO
         InterfaceInfoInvokeVO interfaceInfoInvokeVO = new InterfaceInfoInvokeVO();
@@ -229,11 +247,15 @@ public class InterfaceInfoController {
     @AuthCheck(mustRole = "admin")
     @GetMapping("/list")
     public BaseResponse<List<InterfaceInfo>> listInterfaceInfo(InterfaceInfoQueryRequest interfaceInfoQueryRequest) {
+        // 将接口查询请求对象转为接口信息对象
         InterfaceInfo interfaceInfoQuery = new InterfaceInfo();
         if (interfaceInfoQueryRequest != null) {
             BeanUtils.copyProperties(interfaceInfoQueryRequest, interfaceInfoQuery);
         }
+
+        // 创建查询对象
         QueryWrapper<InterfaceInfo> queryWrapper = new QueryWrapper<>(interfaceInfoQuery);
+        // 查询所有接口信息
         List<InterfaceInfo> interfaceInfoList = interfaceInfoService.list(queryWrapper);
         return ResultUtils.success(interfaceInfoList);
     }
@@ -248,11 +270,14 @@ public class InterfaceInfoController {
     // todo 需整合
     @GetMapping("/list/page")
     public BaseResponse<Page<InterfaceInfo>> listInterfaceInfoByPage(InterfaceInfoQueryRequest interfaceInfoQueryRequest, HttpServletRequest request) {
+        // 参数校验
         if (interfaceInfoQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        // 将请求参数转换为InterfaceInfo对象
         InterfaceInfo interfaceInfoQuery = new InterfaceInfo();
         BeanUtils.copyProperties(interfaceInfoQueryRequest, interfaceInfoQuery);
+        // 分页查询
         long current = interfaceInfoQueryRequest.getCurrent();
         long size = interfaceInfoQueryRequest.getPageSize();
         String sortField = interfaceInfoQueryRequest.getSortField();
@@ -287,15 +312,17 @@ public class InterfaceInfoController {
     @AuthCheck(mustRole = "admin")
     public BaseResponse<Boolean> onlineInterfaceInfo(@RequestBody IdRequest idRequest,
                                                      HttpServletRequest request) {
-        // 1. 参数校验
+        // 参数校验，确保参数非空且符合要求
         if (idRequest == null || idRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        // 查询该接口信息
         long interfaceId = idRequest.getId();
         InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(interfaceId);
         if (oldInterfaceInfo == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
+        //并获取接口地址和示例请求体
         String path = oldInterfaceInfo.getPath();
         String requestBody = oldInterfaceInfo.getDemo();
         try {
@@ -312,8 +339,8 @@ public class InterfaceInfoController {
         if (userInterfaceInfo == null) {
             userInterfaceInfoService.addUserInterface(interfaceId, loginAdmin.getId(), 999999);
         } else if (userInterfaceInfo.getLeftNum() <= 0) {
-           userInterfaceInfo.setLeftNum(999999);
-              userInterfaceInfoService.updateByIdWithoutTransaction(userInterfaceInfo);
+            userInterfaceInfo.setLeftNum(999999);
+            userInterfaceInfoService.updateByIdWithoutTransaction(userInterfaceInfo);
         }
 
         // 3. 调用网关接口, 上线前测试接口是否可用
@@ -352,8 +379,8 @@ public class InterfaceInfoController {
         if (idRequest == null || idRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        // 获取接口id，并且查询该接口信息
         long id = idRequest.getId();
-
         InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
         if (oldInterfaceInfo == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
@@ -382,7 +409,7 @@ public class InterfaceInfoController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         long id = interfaceInfoInvokeRequest.getId();
-
+        //根据id获取接口信息
         InterfaceInfo interfaceInfo = interfaceInfoService.getById(id);
         if (interfaceInfo == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
